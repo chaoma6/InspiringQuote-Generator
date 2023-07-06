@@ -14,11 +14,11 @@ const nextConfig = {
       // Empty by default.
       topLevelImportPaths: [],
       // Defaults to ["index"].
-      meaninglessFileNames: ["index"],
+      meaninglessFileNames: ['index'],
       // Enabled by default.
       cssProp: true,
       // Empty by default.
-      namespace: "",
+      namespace: '',
       // Not supported yet.
       minify: false,
       // Not supported yet.
@@ -27,7 +27,6 @@ const nextConfig = {
       pure: false,
     },
   },
-}
+};
 
-
-module.exports = nextConfig
+module.exports = nextConfig;

@@ -18,6 +18,7 @@ import { API } from 'aws-amplify';
 import React, { useState, useEffect } from 'react';
 import { GraphQLResult } from '@aws-amplify/api-graphql';
 import { quotesQueryName } from '@/src/graphql/queries';
+import QuoteGeneratorModal from '@/components/QuoteGenerator';
 
 // interface for DynamoDb object
 interface UpdateQuoteInfoData {
@@ -45,6 +46,9 @@ function isGraphQLResultForquotesQueryName(
 
 export default function Home() {
   const [numberOfQuotes, setNumberOfQuotes] = useState<Number | null>(0);
+  const [openGenerator, setOpenGenerator] = useState(false);
+  const [processingQuote, setProcessingQuote] = useState(false);
+  const [quoteReceived, setQuoteReceived] = useState<String | null>(null);
 
   // Function to fetch our DynamoDb object (quotes gennerated)
   const updateQuoteInfo = async () => {
@@ -75,6 +79,19 @@ export default function Home() {
     updateQuoteInfo();
   }, []);
 
+  const handleCloseGenerator = () => setOpenGenerator(false);
+
+  const handleOpenGenerator = async (e:React.SyntheticEvent) => {
+    e.preventDefault();
+    setOpenGenerator(true);
+    try {
+      // Lambda function
+    } catch (error) {
+      
+    }
+  
+  }
+
   return (
     <>
       <Head>
@@ -85,8 +102,16 @@ export default function Home() {
       </Head>
       {/* {Background} */}
       <GradientBackgroundCon>
-        {/* Quote Generator Modal Pop=Up */}
-        {/* QuoteGeneratorModal */}
+        {/* Quote Generator Modal Pop-Up */}
+        <QuoteGeneratorModal
+          open={openGenerator}
+          close={handleCloseGenerator}
+          processingQuote={processingQuote}
+          setProcessingQuote={setProcessingQuote}
+          quoteReceived={quoteReceived}
+          setQuoteReceived={setQuoteReceived}
+        />
+
         {/* Quote Generator */}
         <QuoteGeneratorContainer>
           <QuoteGenneratorInnerContainer>
@@ -107,7 +132,7 @@ export default function Home() {
               .
             </QuoteGeneratorSubTitle>
 
-            <GenerateQuoteButton>
+            <GenerateQuoteButton onClick={handleOpenGenerator}>
               <GenerateQuoteButtonText>Make a Quote</GenerateQuoteButtonText>
             </GenerateQuoteButton>
           </QuoteGenneratorInnerContainer>

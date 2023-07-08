@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Backdrop, Fade, Modal } from '@mui/material';
 
 import {
@@ -8,6 +8,10 @@ import {
   QuoteGeneratorSubTitle,
   QuoteGeneratorTitle,
 } from './QuoteGeneratorElements';
+
+import AnimatedDownloadButton from '../animations/AnimatedDownloadButton';
+import ImageBlob from '../animations/ImageBlob';
+import { ImageBlobCon } from '../animations/AnimationElements';
 
 interface QuoteGeneratorModalProps {
   open: boolean;
@@ -28,9 +32,22 @@ const QuoteGeneratorModal = ({
   quoteReceived,
   setQuoteReceived,
 }: QuoteGeneratorModalProps) => {
-
   const wiseDevQuote = '"If you can center a div, anything is possible."';
-    const wiseDevQuoteAuthor = "- a wise senior software engineer";
+  const wiseDevQuoteAuthor = '- a wise senior software engineer';
+
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+
+  // Function:Handling the download of quote card
+  const handleDownload = () => {
+    const link = document.createElement('a');
+    if (typeof blobUrl === 'string') {
+      link.href = blobUrl;
+      link.download = 'quote.png';
+      link.click();
+    }
+  };
+
+  // Function: Handle the receiving of quote card
 
   return (
     <Modal
@@ -70,6 +87,10 @@ const QuoteGeneratorModal = ({
                 <QuoteGeneratorSubTitle style={{ marginTop: '20px' }}>
                   See a preview:
                 </QuoteGeneratorSubTitle>
+                <ImageBlobCon>
+                  <ImageBlob quoteReceived={quoteReceived} blobUrl={blobUrl} />
+                </ImageBlobCon>
+                <AnimatedDownloadButton handleDownload={handleDownload} />
               </>
             )}
           </QuoteGeneratorModalInnerCon>

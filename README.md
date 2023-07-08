@@ -1,4 +1,4 @@
-# Inspirational Quote Generator
+# InspiringQuote Generator
 
 The Ultimate Inspirational Quote Generator utilizes serverless architecture for seamless quote card generation. It converts base64-encoded strings into stunning SVG images, bridging textual inspiration with captivating visuals. Powered by AWS cloud technologies, it ensures scalability and reliability. Users can effortlessly download and share their favorite motivational quote cards, inspiring others effortlessly.
 

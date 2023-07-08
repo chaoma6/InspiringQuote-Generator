@@ -1,3 +1,10 @@
+import React, { useEffect, useState } from 'react';
+
+import Head from 'next/head';
+import Image from 'next/image';
+import styles from '@/styles/Home.module.css';
+
+// compnents
 import {
   GradientBackgroundCon,
   BackgroundImage1,
@@ -11,14 +18,23 @@ import {
   GenerateQuoteButtonText,
   QuoteGenneratorInnerContainer,
 } from '@/components/QuoteGenerator/QuoteGeneratorElements';
-import Head from 'next/head';
-import Clouds1 from '@/assets/cloud-and-thunder.png';
-import Clouds2 from '@/assets/cloudy-weather.png';
-import { API } from 'aws-amplify';
-import React, { useState, useEffect } from 'react';
-import { GraphQLResult } from '@aws-amplify/api-graphql';
-import { quotesQueryName } from '@/src/graphql/queries';
 import QuoteGeneratorModal from '@/components/QuoteGenerator';
+
+// Assets
+import Clouds1 from '../assets/cloud-and-thunder.png';
+import Clouds2 from '../assets/cloudy-weather.png';
+import { API } from 'aws-amplify';
+import { generateAQuote, quotesQueryName } from '@/src/graphql/queries';
+import { GraphQLResult } from '@aws-amplify/api-graphql';
+
+// interface for our appsync <> lambda function
+interface GenerateAQuoteData {
+  generateAQuote: {
+    statusCode: number;
+    headers: { [key: string]: string };
+    body: string;
+  };
+}
 
 // interface for DynamoDb object
 interface UpdateQuoteInfoData {
@@ -56,9 +72,12 @@ export default function Home() {
       const response = await API.graphql<UpdateQuoteInfoData>({
         query: quotesQueryName,
         authMode: 'AWS_IAM',
-        variables: { queryName: 'LIVE' },
+        variables: {
+          queryName: 'LIVE',
+        },
       });
 
+      // Create type guards
       if (!isGraphQLResultForquotesQueryName(response)) {
         throw new Error('Unexpected response from API.graphql');
       }
@@ -67,9 +86,9 @@ export default function Home() {
         throw new Error('Response data is undefined');
       }
 
-      const receivednumberOfQuotes =
+      const receivedNumberOfQuotes =
         response.data.quotesQueryName.items[0].quotesGenerated;
-      setNumberOfQuotes(receivednumberOfQuotes);
+      setNumberOfQuotes(receivedNumberOfQuotes);
     } catch (error) {
       console.log('error getting quote data', error);
     }
@@ -79,18 +98,47 @@ export default function Home() {
     updateQuoteInfo();
   }, []);
 
-  const handleCloseGenerator = () => setOpenGenerator(false);
+  // Functions for quote generator modal
+  const handleCloseGenerator = () => {
+    setOpenGenerator(false);
+    setProcessingQuote(false);
+    setQuoteReceived(null);
+  };
 
-  const handleOpenGenerator = async (e:React.SyntheticEvent) => {
+  const handleOpenGenerator = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setOpenGenerator(true);
+    setProcessingQuote(true);
     try {
-      // Lambda function
+      //Run Lambda Function
+      const runFunction = 'runFunction';
+      const runFunctionStringified = JSON.stringify(runFunction);
+      const response = await API.graphql<GenerateAQuoteData>({
+        query: generateAQuote,
+        authMode: 'AWS_IAM',
+        variables: {
+          input: runFunctionStringified,
+        },
+      });
+      const responseStringified = JSON.stringify(response);
+      const responseReStringified = JSON.stringify(responseStringified);
+      const bodyIndex = responseReStringified.indexOf('body=') + 5;
+      const bodyAndBase64 = responseReStringified.substring(bodyIndex);
+      const bodyArray = bodyAndBase64.split(',');
+      const body = bodyArray[0];
+      console.log(body);
+      setQuoteReceived(body);
+
+      // End state:
+      setProcessingQuote(false);
+
+      // Fetch if any new quotes were generated from counter
+      updateQuoteInfo();
     } catch (error) {
-      
+      console.log('error generating quote:', error);
+      setProcessingQuote(false);
     }
-  
-  }
+  };
 
   return (
     <>

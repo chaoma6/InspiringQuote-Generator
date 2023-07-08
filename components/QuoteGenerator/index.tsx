@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Backdrop, Fade, Modal } from '@mui/material';
 
 import {
@@ -48,6 +48,19 @@ const QuoteGeneratorModal = ({
   };
 
   // Function: Handle the receiving of quote card
+  useEffect(() => {
+    if (quoteReceived) {
+      const binaryData = Buffer.from(quoteReceived, 'base64');
+      const blob = new Blob([binaryData], { type: 'image/png' });
+      const blobUrlGenerated = URL.createObjectURL(blob);
+      console.log(blobUrlGenerated);
+      setBlobUrl(blobUrlGenerated);
+
+      return () => {
+        URL.revokeObjectURL(blobUrlGenerated);
+      };
+    }
+  }, [quoteReceived]);
 
   return (
     <Modal
